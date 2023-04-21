@@ -8,6 +8,8 @@ Task description
 ----
 A set of 3D primitives is given. We need to solve the problem of classifying objects using a neural network represented in the form of a point cloud.
 
+Primitives model cen recognize: cone, cube, cylinder, plane, torus, sphere.
+
 Data splited into: train, test, valid
 
 For estimating model we'll use scikit classification_report on test set.
