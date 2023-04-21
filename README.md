@@ -1,2 +1,5 @@
-# 3d_recognition_CNN-app
-Application to recognize shape of objects using CNN
+# CNN shape recognition
+
+This is end-to-end educational project of modeling in deploing CNN to classify .obj primitives.
+
+This project implemented using PyTorch
