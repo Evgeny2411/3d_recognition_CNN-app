@@ -4,6 +4,16 @@ This is an end-to-end learning project to model and deploy CNNs for classifying 
 
 This project was implemented with PyTorch
 
+Structure:
+ - App.py streamlit app
+ - model.py helper class with architecture and data conversion methods
+ - Model_preporation notebook with the process of training and network analysis
+ - models folder with weights of network and encoder class
+ - data folder with related data
+ - dockerfile
+ - requirements.txt
+ 
+
 Task description
 ----
 A set of 3D primitives is given. We need to solve the problem of classifying objects in the form of a point cloud using neural network.
