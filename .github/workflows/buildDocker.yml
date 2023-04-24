@@ -13,7 +13,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag evgemy2411/3d_shape_recognizer:$(date +%s)
+      run: docker build . --file Dockerfile --tag evgeny2411/3d_shape_recognizer:$(date +%s)
       
     - name: Push to Docker rep
       run: docker push evgeny2411/3d_shape_recognizer:$(date +%s)
