@@ -1,0 +1,9 @@
+numpy==1.23.5
+scikit-learn==1.2.2
+trimesh==3.21.5
+--find-links https://download.pytorch.org/whl/torch_stable.html
+torch==1.9.0+cpu
+pickleshare==0.7.5
+pandas==1.5.3
+streamlit==1.21.0
+plotly==5.14.1
