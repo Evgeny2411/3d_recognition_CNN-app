@@ -19,6 +19,6 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: ./Dockerfile
+          file: https://github.com/Evgeny2411/3d_recognition_CNN-app/blob/main/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/3d_shape_recognizer:latest
