@@ -26,4 +26,16 @@ Functionality:
  Application deploed by docker container.
  CI/CD maked by GitHub Actions
  
+---
+Realisation
+---
+
+As our task belongs to cloud of points task, the best solution will be using PointNet architecture.
+
+Implemented model give almost perfect metrics on final validation dataset:
+
+![image](images/report.png "Classifying report")
+
+The application was implemented in Streamlit api.
+
  
