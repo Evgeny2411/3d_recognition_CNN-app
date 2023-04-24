@@ -1,0 +1,19 @@
+name: Build Docker
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag 3d_shape_recognizer:$(date +%s)
+      
+    - name: Push to Docker rep
+      run: docker push evgeny2411/3d_shape_recognizer:$(date +%s)
