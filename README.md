@@ -1,12 +1,12 @@
 # CNN shape recognition
 
-This is end-to-end educational project of modeling in deploing CNN to classify .obj primitives.
+This is an end-to-end learning project to model and deploy CNNs for classifying .obj primitives.
 
-This project implemented using PyTorch
+This project was implemented with PyTorch
 
 Task description
 ----
-A set of 3D primitives is given. We need to solve the problem of classifying objects using a neural network represented in the form of a point cloud.
+A set of 3D primitives is given. We need to solve the problem of classifying objects in the form of a point cloud using neural network.
 
 Primitives model cen recognize: cone, cube, cylinder, plane, torus, sphere.
 
@@ -23,19 +23,19 @@ Functionality:
  - Show rendered 3d object
  - Show how confident model in prediction
  
- Application deploed by docker container.
+ The application is deployed using a docker container.
  CI/CD maked by GitHub Actions
  
 ---
-Realisation
+Implementation
 ---
 
-As our task belongs to cloud of points task, the best solution will be using PointNet architecture.
+Since our task is a point cloud task, the best solution is to use the PointNet architecture.
 
-Implemented model give almost perfect metrics on final validation dataset:
+The implemented model yields almost perfect metrics on the final validation dataset:
 
 ![image](images/report.png "Classifying report")
 
-The application was implemented in Streamlit api.
+The application is implemented on the Streamlit api.
 
  
