@@ -1,0 +1,9 @@
+Metadata-Version: 2.1
+Name: recognizer3d
+Version: 0.1
+Summary: Classify shape by cloud of points
+Author: Yevhenii Borysenko
+Author-email: borisenko1315@gmai.com
+Requires-Python: >=3.9
+Provides-Extra: dev
+Provides-Extra: docs

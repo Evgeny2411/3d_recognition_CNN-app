@@ -1,0 +1,17 @@
+site_name: 3d Recognizer
+nav:
+  - Home: index.md
+  - workflows:
+      - app: recognizer3d/app.py
+  - recognizer3d:
+      - data: recognizer3d/data.md
+      - evaluate: recognizer3d/evaluate.md
+      - predict: recognizer3d/predict.md
+      - train: recognizer3d/train.md
+      - utils: recognizer3d/utils.md
+      - model: recognizer3d/model.md
+theme: readthedocs
+plugins:
+  - mkdocstrings
+watch:
+  - .

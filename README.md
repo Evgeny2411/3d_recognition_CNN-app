@@ -3,15 +3,6 @@
 This is an end-to-end learning project to model and deploy CNNs for classifying .obj primitives.
 
 This project was implemented with PyTorch
-
-Structure:
- - App.py streamlit app
- - model.py helper class with architecture and data conversion methods
- - Model_preporation notebook with the process of training and network analysis
- - models folder with weights of network and encoder class
- - data folder with related data
- - dockerfile
- - requirements.txt
  
 
 Task description
@@ -23,6 +14,8 @@ Primitives model cen recognize: cone, cube, cylinder, plane, torus, sphere.
 Data splited into: train, test, valid
 
 For estimating model we'll use scikit classification_report on test set.
+
+[Detailed Documentation](docs/index.md)
 
 ---
 Requirements for the application
@@ -36,16 +29,14 @@ Functionality:
  The application is deployed using a docker container.
  CI/CD maked by GitHub Actions
  
----
-Implementation
----
 
-Since our task is a point cloud task, the best solution is to use the PointNet architecture.
+### User manual
+```bash
+python3 -m venv venv
+source venv/bin/activate
+python3 -m pip install pip setuptools wheel
+python3 -m pip install -e .
+```
 
-The implemented model yields almost perfect metrics on the final validation dataset:
-
-![image](images/report.png "Classifying report")
-
-The application is implemented on the Streamlit api.
 
  
