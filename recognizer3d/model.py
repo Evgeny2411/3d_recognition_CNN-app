@@ -1,19 +1,26 @@
+import pickle
+from argparse import Namespace
+from pathlib import Path
+from config import config
+from recognizer3d import data, utils
+
+import pandas as pd
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import pickle
-import numpy as np
-import pandas as pd
+
+
+args = Namespace(**utils.load_dict(filepath=Path(config.CONFIG_DIR, "args.json")))
 class Tnet(nn.Module):
     def __init__(self, k=3):
         super().__init__()
-        self.k=k
-        self.conv1 = nn.Conv1d(k,64,1)
-        self.conv2 = nn.Conv1d(64,128,1)
-        self.conv3 = nn.Conv1d(128,1024,1)
-        self.fc1 = nn.Linear(1024,512)
-        self.fc2 = nn.Linear(512,256)
-        self.fc3 = nn.Linear(256,k*k)
+        self.k = k
+        self.conv1 = nn.Conv1d(k, 64, 1)
+        self.conv2 = nn.Conv1d(64, 128, 1)
+        self.conv3 = nn.Conv1d(128, 1024, 1)
+        self.fc1 = nn.Linear(1024, 512)
+        self.fc2 = nn.Linear(512, 256)
+        self.fc3 = nn.Linear(256, k * k)
 
         self.bn1 = nn.BatchNorm1d(64)
         self.bn2 = nn.BatchNorm1d(128)
@@ -21,24 +28,28 @@ class Tnet(nn.Module):
         self.bn4 = nn.BatchNorm1d(512)
         self.bn5 = nn.BatchNorm1d(256)
 
-    def forward(self, input):
-        bs = input.size(0)
-        xb = F.relu(self.bn1(self.conv1(input)))
-        xb = F.relu(self.bn2(self.conv2(xb)))
-        xb = F.relu(self.bn3(self.conv3(xb)))
-        pool = nn.MaxPool1d(xb.size(-1))(xb)
-        flat = nn.Flatten(1)(pool)
-        xb = F.relu(self.bn4(self.fc1(flat)))
-        xb = F.relu(self.bn5(self.fc2(xb)))
+        self.max_pool = nn.MaxPool1d(kernel_size=1)
+        self.flatten = nn.Flatten(start_dim=1)
 
-        init = torch.eye(self.k, requires_grad=True).repeat(bs,1,1)
-        if xb.is_cuda:
-            init=init.cuda()
-        matrix = self.fc3(xb).view(-1,self.k,self.k) + init
+    def forward(self, input: torch.Tensor):
+        bs = input.size(0)
+        output = F.relu(self.bn1(self.conv1(input)))
+        output = F.relu(self.bn2(self.conv2(output)))
+        output = F.relu(self.bn3(self.conv3(output)))
+        pool = self.max_pool(output)
+        flat = self.flatten(pool)
+        output = F.relu(self.bn4(self.fc1(flat)))
+        output = F.relu(self.bn5(self.fc2(output)))
+
+        init = torch.eye(self.k, requires_grad=True).repeat(bs, 1, 1)
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        init = init.to(device)
+        matrix = self.fc3(output).view(-1, self.k, self.k) + init
         return matrix
 
+
 class PointNetBackbone(nn.Module):
-    def __init__(self, num_points=1024, num_feats=1024):
+    def __init__(self, num_points: int = args.num_points, num_feats: int = args.num_points):
 
         super(PointNetBackbone, self).__init__()
 
@@ -68,8 +79,7 @@ class PointNetBackbone(nn.Module):
         # max pool to get the global features
         self.max_pool = nn.MaxPool1d(kernel_size=num_points, return_indices=True)
 
-
-    def forward(self, x):
+    def forward(self, x: torch.Tensor):
 
         bs = x.shape[0]
 
@@ -100,9 +110,10 @@ class PointNetBackbone(nn.Module):
         critical_indexes = critical_indexes.view(bs, -1)
 
         return features, critical_indexes, A_feat
-class PointNet(nn.Module):
 
-    def __init__(self, classes = 6):
+
+class PointNet(nn.Module):
+    def __init__(self, classes: int = args.num_classes):
         super().__init__()
         self.transform = PointNetBackbone()
         self.fc1 = nn.Linear(1024, 512)
@@ -113,7 +124,7 @@ class PointNet(nn.Module):
         self.bn2 = nn.BatchNorm1d(256)
         self.dropout = nn.Dropout(p=0.3)
 
-    def forward(self, input):
+    def forward(self, input: torch.Tensor):
         x, crit_idxs, A_feat = self.transform(input)
         x = self.bn1(F.relu(self.fc1(x)))
         x = self.bn2(F.relu(self.fc2(x)))
@@ -122,38 +133,33 @@ class PointNet(nn.Module):
         return x, crit_idxs, A_feat
 
 
-class Model():
-    def __init__(self):
-        self.__predictioner = PointNet()
-        self.__predictioner.load_state_dict(torch.load('models/modelv1'))
+class Model:
+    def __init__(self, args_fp):
+        self.__model = PointNet()
+        self.__model.load_state_dict(torch.load(Path(config.MODELS_DIR, "modelv1")))
         self.__encoder = self.__load_encoder()
-        self.__num_points = 1024
+        self.__num_points = args.num_points
+
     def __load_encoder(self):
-        with open('models/encoder.pkl', 'rb') as f:
+        with open(Path(config.MODELS_DIR, "encoder.pkl"), "rb") as f:
             return pickle.load(f)
 
-    def __data_transform(self, points):
-        points = self.__downsample(points)
-        points = (points - np.mean(points, axis=0)) / np.std(points, axis=0)
-        points = torch.from_numpy(points).type(torch.float32)
-        points = points.transpose(-2,1)
-        points = points.view([1, 3, 1024])
-        return points
+    def create_prediction_df(selfs, probabilities):
+        return pd.DataFrame(
+            index=self.__encoder.classes_,
+            columns=["Probs"],
+            data=torch.softmax(preds, dim=1)[0],
+        )
 
-    def __downsample(self, points):
-        if len(points) > self.__num_points:
-            choice = np.random.choice(len(points), self.__num_points, replace=False)
-        else:
-            choice = np.random.choice(len(points), self.__num_points, replace=True)
-        points = points[choice, :]
-
-        return points
-    def prediction(self, points):
+    def predict_probs(self, points: int):
         with torch.no_grad():
-            self.__predictioner.eval()
-            points = self.__data_transform(points)
-            preds, _, A = self.__predictioner(points)
-            probabilities = pd.DataFrame(index = self.__encoder.classes_, columns = ['Probs'], data = torch.softmax(preds, dim=1)[0])
+            self.__model.eval()
+            points = data.points_transform(points, self.__num_points)
+            preds, _, _ = self.__model(points)
+            probabilities = create_prediction_df(preds)
         return probabilities
 
-#%%
+    def make_prediction(self, points: int) -> pd.DataFrame:
+        prediction_df = self.predict_probs(points=points)
+        prediction = prediction_df.sort_values(by="Probs", ascending=False)
+        return prediction
