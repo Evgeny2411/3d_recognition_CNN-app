@@ -1,0 +1,6 @@
+config
+data
+images
+models
+recognizer3d
+venv
